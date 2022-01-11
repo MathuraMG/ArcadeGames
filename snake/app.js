@@ -1,99 +1,106 @@
-/******************************** VARIABLE DEFINITIONS *********************/
+/******************************** letIABLE DEFINITIONS *********************/
 //Constants
-var row = 26, col =26;
-var EMPTY = 0, SNAKE = 1, FOOD = 2, NUMNUM = 3;
+let row = 26, col =26;
+let EMPTY = 0, SNAKE = 1, FOOD = 2, NUMNUM = 3;
 
 //Directions
-var UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3;
+let UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3;
 
 //Key states
-var KEY_LEFT = 37 , KEY_UP = 38, KEY_RIGHT = 39, KEY_DOWN = 40;
+let KEY_LEFT = 37 , KEY_UP = 38, KEY_RIGHT = 39, KEY_DOWN = 40;
 
 //Game objects
-var canvas, ctx,keystate, frames, score;
+let canvas, ctx,keystate, frames, score;
 
-// All var for numnum
-var startTime, currTime, numx = 0, numy = 0;
+// All let for numnum
+let startTime, currTime, numx = 0, numy = 0;
 
 //Food pictures
-var cherry  = new  Image();
+let cherry  = new  Image();
 cherry.src = "cherries.png";
 
-var grapes = new Image();
+let grapes = new Image();
 grapes.src = "grapes.jpeg";
 
+
+
 //Main variables
-var grid ={
-
-	width: null,
-	height: null,
-	_grid: null,
-
-	init: function(d,c,r){
+class Grid{
+	constructor() {
+		this.width= null;
+		this.height= null;
+		this._grid= null;
+	}
+	
+	init(d,c,r){
 		this.width = col;
 		this.height = row;
 
 		this._grid =[];
 
-		for (var i = 0; i < col; i++) {
+		for (let i = 0; i < col; i++) {
 			this._grid.push([]);
-			for (var j = 0; j < row; j++) {
+			for (let j = 0; j < row; j++) {
 				this._grid[i].push(d);
 				};			
 			};
-	},
-
-	set: function( val, x, y ){
+	}
+	
+	set( val, x, y ){
 		this._grid[x][y] = val;
-	},
+	}
 
-	get: function( x,y ) {
+	get( x,y ) {
 		return this._grid[x][y];
-	},
-
+	}
 }
 
-var snake = {
+let grid = new Grid();
 
-	direction: null,
-	last: null,
-	_queue: null,
+class Snake{
 
-	init: function( d,x,y){
+	constructor() {
+		this.direction= null;
+		this.last= null;
+		this._queue= null;
+	}
+	
+
+	init(d,x,y){
 		this.direction = d;
-
 		this._queue = [];
 		this.insert(x,y);
 
-	},
+	}
 
-	insert: function(x, y ){
+	insert(x, y ){
 		this._queue.unshift({x:x, y:y});
 		this.last = this._queue[0];
 
-	},
+	}
 
-	remove: function(){
+	remove(){
 		return this._queue.pop();
 	}
 
 }
 
+let snake = new Snake();
 
 /****************** FUNCTION DEFINITIONS **********************/
 
 
 function setFood( type ) {
-var empty = [];
-	for (var i = 0; i < grid.width; i++) {
-		for (var j = 0; j < grid.height; j++) {
+let empty = [];
+	for (let i = 0; i < grid.width; i++) {
+		for (let j = 0; j < grid.height; j++) {
 			if( grid.get(i,j) == EMPTY ){
 				empty.push({x:i, y:j});
 			}
 		}	
 
 	}
-	var randpos = empty[Math.floor(Math.random()*empty.length)];
+	let randpos = empty[Math.floor(Math.random()*empty.length)];
 	grid.set( type, randpos.x, randpos.y);
 	return randpos;
 }
@@ -122,7 +129,7 @@ function createCanvas()
 function init() {
 	grid.init( EMPTY, col, row);
 	score = 0;
-	var sp = { x:Math.floor(col/2), y:row -1}; 
+	let sp = { x:Math.floor(col/2), y:row -1}; 
 	snake.init( LEFT, sp.x, sp.y);
 	grid.set( SNAKE, sp.x, sp.y );
 	setFood( FOOD );
@@ -137,6 +144,7 @@ function loop() {
 }
 
 function update() {
+	let tail;
 	
 	frames++ ;
 	
@@ -148,8 +156,8 @@ function update() {
 
 	//automatically move the snake
 	if( frames%5 == 0){
-		var nx = snake.last.x;
-		var ny = snake.last.y;
+		let nx = snake.last.x;
+		let ny = snake.last.y;
 		switch( snake.direction ){
 			case LEFT:
 				if(nx<=0) {nx = (col - nx -1 )%col;}
@@ -173,7 +181,7 @@ function update() {
 		//if FOOD/NUMNUM
 		if( (grid.get(nx,ny) == FOOD) ||( grid.get(nx,ny) == NUMNUM ) )
 		{
-			var tail = {x:nx, y:ny};
+			tail = {x:nx, y:ny};
 
 			if(grid.get(nx,ny) == NUMNUM) { score = score +2 ;}
 			else{ score++; }
@@ -194,13 +202,13 @@ function update() {
 		else if( grid.get(nx,ny) == SNAKE )
 		{
 			init();
-			var tail = snake.remove();
+			tail = snake.remove();
 		}
 
 		// if nothing, just move on
 		else
 		{
-			var tail = snake.remove();
+			tail = snake.remove();
 			grid.set( EMPTY, tail.x, tail.y);
 			tail.x = nx;
 			tail.y = ny;
@@ -228,11 +236,11 @@ function update() {
 function draw() {
 
 
-	var tw = canvas.width/grid.width;
-	var th = canvas.height/grid.height;
+	let tw = canvas.width/grid.width;
+	let th = canvas.height/grid.height;
 	
-	for (var i = 0; i < grid.width; i++) {
-		for (var j = 0; j < grid.height; j++) {
+	for (let i = 0; i < grid.width; i++) {
+		for (let j = 0; j < grid.height; j++) {
 			switch( grid.get(i,j)){
 
 			case EMPTY:

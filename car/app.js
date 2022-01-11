@@ -1,49 +1,52 @@
 /******************* VARIABLE DEFINITION *************************/
 //Constants
-var ROW = 30, COL =20;
-var EMPTY = 0, CAR = 1, RCAR = 2 ;
-var CENTER = 9, LEFT = 3, RIGHT = 15;
+let ROW = 30, COL =20;
+let EMPTY = 0, CAR = 1, RCAR = 2 ;
+let CENTER = 9, LEFT = 3, RIGHT = 15;
 
 //Key states
-var KEY_LEFT = 37 , KEY_RIGHT = 39, KEY_UP = 38, ESC = 27;
+let KEY_LEFT = 37 , KEY_RIGHT = 39, KEY_UP = 38, ESC = 27;
 
 //speed variables
-var FAST = 2, NORMAL = 8;
+let FAST = 2, NORMAL = 8;
 
 //Game variables
-var canvas, ctx, score, frames, keystate, currFrame , speed;
-var carpos = CENTER ;
-var gamefail = 0;
-var count = 0;
+let canvas, ctx, score, frames, keystate, currFrame , speed;
+let carpos = CENTER ;
+let gamefail = 0;
+let count = 0;
 
 //Score variables
-var carcrossed ;
-var startTime, endTime;
+let carcrossed ;
+let startTime, endTime;
 
 //Main variables
-var map ={
+class Map{
+	constructor() {
+		this.width= null;
+		this.height= null;
+		this._grid= null;
+	}
+	
 
-	width: null,
-	height: null,
-	_grid: null,
-
-	init: function(d) {
+	init(d) {
 		this.width = COL;
 		this.height = ROW*20;
 
 		this._grid = [] ;
 
-		for (var i = 0; i < this.width; i++) {
+		for (let i = 0; i < this.width; i++) {
 			this._grid.push([]);
-			for (var j = 0; j < this.height; j++) {
+			for (let j = 0; j < this.height; j++) {
 				this._grid[i].push(d);
 			};			
 		};
 
-		posx = [LEFT, CENTER, RIGHT ];
-		posyprev = 0;
-		posxprev = 1;
-		ydiff = [8 ,9,10];
+		let posx = [LEFT, CENTER, RIGHT ];
+		let posyprev = 0;
+		let posxprev = 1;
+		let ydiff = [8 ,9,10];
+		let randx, randy;
 		while ( posyprev < this.height - 20 ) {
 			do
 			{
@@ -54,54 +57,57 @@ var map ={
 			setCar( this, CAR, posx[randx], posyprev + ydiff[randy] );
 			posyprev = posyprev + ydiff[randy] ;
 		}
+	}
 
-		
-	},
-
-	set: function( val, x, y ){
+	set( val, x, y ){
 		this._grid[x][y] = val;
-	},
+	}
 
-	get: function( x,y ) {
+	get( x,y ) {
 		return this._grid[x][y];
-	},
+	}
 
 }
 
-var grid ={
+let map = new Map();
 
-	width: null,
-	height: null,
-	_grid: null,
+class Grid{
+	constructor() {
+		this.width= null;
+		this.height= null;
+		this._grid= null;
+	}
 
-	init: function(d,c,r){
+	init(d,c,r){
 		this.width = COL;
 		this.height = ROW;
 
 		this._grid =[];
 
-		for (var i = 0; i < c; i++) {
+		for (let i = 0; i < c; i++) {
 			this._grid.push([]);
-			for (var j = 0; j < r; j++) {
+			for (let j = 0; j < r; j++) {
 				this._grid[i].push(d);
 				};			
 			};
-	},
+	}
 
-	set: function( val, x, y ){
+	set( val, x, y ){
 		this._grid[x][y] = val;
-	},
+	}
 
-	get: function( x,y ) {
+	get( x,y ) {
 		return this._grid[x][y];
-	},
+	}
 
 }
+
+let grid = new Grid();
 
 /*************** FUNCTION DEFINITIONS **********************/
 function mainScreen()
 {
-	var div = document.getElementById("canvas");
+	let div = document.getElementById("canvas");
 	if( div ) {document.body.removeChild( div );}
 
 	mainDiv = document.createElement("div");
@@ -121,14 +127,14 @@ function mainScreen()
 
 function clearScreen()
 {
-	var div = document.getElementById("mainScreen");
+	let div = document.getElementById("mainScreen");
 	document.body.removeChild( div );
 }
 
 function setCar( place, type, x, y )
 {
-	for (var i = 0; i < 3; i++) {
-		for (var j = 0; j < 4; j++) {
+	for (let i = 0; i < 3; i++) {
+		for (let j = 0; j < 4; j++) {
 			if( !( ( i==0 || i==2 ) && ( j==0 || j==2 ) ) )  {
 				place.set(type, x+i, y+j);	
 			}
@@ -193,7 +199,7 @@ function update()
 if( !gamefail )
 	{
 		frames++;
-		var carposNew = carpos;
+		let carposNew = carpos;
 		
 		//to reduce sensitivity of keys being presed
 		if( frames - currFrame > 6 )
@@ -255,8 +261,8 @@ else
 function check( count )
 {
 
-for (var i = 0; i < grid.width; i++) {
-	for (var j = 0; j < grid.height; j++) {
+for (let i = 0; i < grid.width; i++) {
+	for (let j = 0; j < grid.height; j++) {
 		
 		if( ( grid.get(i,j) + map.get(i,j + ( map.height - grid.height - count ) ) )==3 )	
 			{
@@ -278,7 +284,7 @@ function endGame()
 function calcscore( count )
 {
 
-for (var i = 0; i < grid.width; i++) {
+for (let i = 0; i < grid.width; i++) {
 	if( map.get( i, ( map.height - grid.height - count ) ) == 1)
 	{
 		carcrossed++;
@@ -295,8 +301,8 @@ function draw( count )
 tw = canvas.width/grid.width;
 th = canvas.height/grid.height;
 
-for (var i = 0; i < grid.width; i++) {
-		for (var j = 0; j < grid.height; j++) {
+for (let i = 0; i < grid.width; i++) {
+		for (let j = 0; j < grid.height; j++) {
 			switch( grid.get(i,j) + map.get(i,j + ( map.height - grid.height - count ) ) ){
 
 			case EMPTY:
