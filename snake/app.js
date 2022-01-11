@@ -16,12 +16,12 @@ let canvas, ctx,keystate, frames, score;
 let startTime, currTime, numx = 0, numy = 0;
 
 //Food pictures
-let cherry  = new  Image();
-cherry.src = "cherries.png";
+let cherry, grapes;
 
-let grapes = new Image();
-grapes.src = "grapes.jpeg";
-
+function preload() {
+	cherry = loadImage('cherries.png');
+	grapes = loadImage('grapes.jpeg')
+}
 
 
 //Main variables
@@ -116,46 +116,20 @@ function getKey()
 	} );
 }
 
-function createCanvas()
-{
-	canvas = document.createElement("canvas");
-	canvas.classList.add("grid");
-	canvas.width = col*20;
-	canvas.height = row*20;
-	ctx = canvas.getContext("2d");
-	document.body.appendChild(canvas);
-}
-
-function init() {
-	grid.init( EMPTY, col, row);
-	score = 0;
-	let sp = { x:Math.floor(col/2), y:row -1}; 
-	snake.init( LEFT, sp.x, sp.y);
-	grid.set( SNAKE, sp.x, sp.y );
-	setFood( FOOD );
-}
-
-function loop() {
-
-	update();
-	draw();
-
-	window.requestAnimationFrame( loop, canvas );
-}
-
-function update() {
+function moveSnake() {
 	let tail;
 	
-	frames++ ;
+	// frames++ ;
 	
+	if(keyIsPressed) {
 	//change direction of the snake
-	if (keystate[KEY_LEFT] && snake.direction != RIGHT) { snake.direction = LEFT; }
-	if (keystate[KEY_RIGHT] && snake.direction != LEFT ) { snake.direction = RIGHT; }
-	if (keystate[KEY_DOWN] && snake.direction != UP) { snake.direction = DOWN; }
-	if (keystate[KEY_UP] && snake.direction != DOWN) { snake.direction = UP; }
-
+		if (keyCode == LEFT_ARROW && snake.direction != RIGHT) { snake.direction = LEFT; }
+		if (keyCode == RIGHT_ARROW && snake.direction != LEFT ) { snake.direction = RIGHT; }
+		if (keyCode == DOWN_ARROW && snake.direction != UP) { snake.direction = DOWN; }
+		if (keyCode == UP_ARROW && snake.direction != DOWN) { snake.direction = UP; }
+	}
 	//automatically move the snake
-	if( frames%5 == 0){
+	if( frameCount%3 == 0){
 		let nx = snake.last.x;
 		let ny = snake.last.y;
 		switch( snake.direction ){
@@ -233,57 +207,56 @@ function update() {
 
 }
 
-function draw() {
+function drawSnake() {
 
-
-	let tw = canvas.width/grid.width;
-	let th = canvas.height/grid.height;
+	console.log(width);
+	let tw = width/grid.width;
+	let th = height/grid.height;
 	
 	for (let i = 0; i < grid.width; i++) {
 		for (let j = 0; j < grid.height; j++) {
 			switch( grid.get(i,j)){
 
 			case EMPTY:
-				ctx.fillStyle = "#fff";
-				ctx.fillRect(i*tw, j*th , tw,th);	
+				fill("#fff");
+				rect(i*tw, j*th , tw,th);	
 				break;
 			case SNAKE:
-				ctx.fillStyle = "#00F210";
-				ctx.fillRect(i*tw, j*th , tw,th);
+				fill("#00F210");
+				rect(i*tw, j*th , tw,th);
 				break;
 			case FOOD:
-				ctx.drawImage(cherry,i*tw, j*th , tw,th );
+				image(cherry,i*tw, j*th , tw,th );
   				break;
 			case NUMNUM:
-				ctx.drawImage(grapes,i*tw, j*th , tw,th );
+				image(grapes,i*tw, j*th , tw,th );
 				break;
 			}
 			
 		}	
 	}	
-	ctx.fillStyle = "#000";
-	ctx.font =  "12px Arial";
-	ctx.fillText( ( "SCORE : " + score ) , 10 , ( canvas.height - 10 ) );
+	fill("#000");
+	// ctx.font =  "12px Arial";
+	text( ( "SCORE : " + score ) , 10 , ( height - 10 ) );
 }
 
-/************************ MAIN FUNCTION **********************/
+/************************ MAIN p5 FUNCTIONS **********************/
 
-
-function main() {
-
-//create the main canvas
-	createCanvas();
-
-// init the main variables
-	init();
-
-// get the key pressed 	
-	getKey();	
-
-// Loopy the game
-	frames =0;
-	loop();
-
+function setup() {
+	createCanvas(col*20, row*20);
+	background(200,123,65);
+	grid.init( EMPTY, col, row);
+	score = 0;
+	let sp = { x:Math.floor(col/2), y:row -1}; 
+	snake.init( LEFT, sp.x, sp.y);
+	grid.set( SNAKE, sp.x, sp.y );
+	setFood( FOOD );
 }
 
-window.onload = main;
+function draw() {
+
+	moveSnake();
+	drawSnake();
+
+	// window.requestAnimationFrame( loop, canvas );
+}
