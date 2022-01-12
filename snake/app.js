@@ -13,14 +13,8 @@ let UP = 0,
   LEFT = 2,
   RIGHT = 3;
 
-//Key states
-let KEY_LEFT = 37,
-  KEY_UP = 38,
-  KEY_RIGHT = 39,
-  KEY_DOWN = 40;
-
 //Game objects
-let canvas, ctx, keystate, frames, score;
+let score;
 
 // All let for numnum
 let startTime,
@@ -112,8 +106,6 @@ function setFood(type) {
 
 function moveSnake() {
   let tail;
-
-  // frames++ ;
 
   if (keyIsPressed) {
     //change direction of the snake

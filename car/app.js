@@ -20,7 +20,7 @@ let FAST = 2,
   NORMAL = 8;
 
 //Game variables
-let canvas, ctx, score, frames, keystate, currFrame, speed;
+let score, frames, currFrame, speed;
 let carpos = CENTER;
 let gamefail = 0;
 let count = 0;
@@ -144,16 +144,6 @@ function setCar(place, type, x, y) {
       }
     }
   }
-}
-
-function createCanvas() {
-  canvas = document.createElement("canvas");
-  canvas.id = "canvas";
-  canvas.classList.add("grid");
-  width = COL * 20;
-  height = ROW * 20;
-  ctx = canvas.getContext("2d");
-  document.body.appendChild(canvas);
 }
 
 function setup() {
