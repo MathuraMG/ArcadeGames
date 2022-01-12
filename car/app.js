@@ -9,14 +9,12 @@ let CENTER = 9,
   LEFT = 3,
   RIGHT = 15;
 
+let carImage, carImageR;
 //Key states
-let KEY_LEFT = 37,
-  KEY_RIGHT = 39,
-  KEY_UP = 38,
-  ESC = 27;
+let ESC = 27;
 
 //speed variables
-let FAST = 2,
+let FAST = 1,
   NORMAL = 8;
 
 //Game variables
@@ -35,13 +33,14 @@ class Map {
     this.width = null;
     this.height = null;
     this._grid = null;
+    this.cars = [];
   }
 
   init(d) {
     this.width = COL;
     this.height = ROW * 20;
-
     this._grid = [];
+    this.cars = [];
 
     for (let i = 0; i < this.width; i++) {
       this._grid.push([]);
@@ -55,6 +54,7 @@ class Map {
     let posxprev = 1;
     let ydiff = [8, 9, 10];
     let randx, randy;
+
     while (posyprev < this.height - 20) {
       do {
         randx = Math.floor(Math.random() * 3);
@@ -62,8 +62,11 @@ class Map {
       posxprev = randx;
       randy = Math.floor(Math.random() * 3);
       setCar(this, CAR, posx[randx], posyprev + ydiff[randy]);
+      this.cars.push({x: posx[randx], y:posyprev + ydiff[randy]});
+      drawImageCar(this, CAR, posx[randx], posyprev + ydiff[randy]);
       posyprev = posyprev + ydiff[randy];
     }
+
   }
 
   set(val, x, y) {
@@ -87,7 +90,6 @@ class Grid {
   init(d, c, r) {
     this.width = COL;
     this.height = ROW;
-
     this._grid = [];
 
     for (let i = 0; i < c; i++) {
@@ -110,32 +112,6 @@ class Grid {
 let grid = new Grid();
 
 /*************** FUNCTION DEFINITIONS **********************/
-function mainScreen() {
-  let div = document.getElementById("canvas");
-  if (div) {
-    document.body.removeChild(div);
-  }
-
-  mainDiv = document.createElement("div");
-  mainDiv.classList.add("mainScreen");
-  mainDiv.id = "mainScreen";
-  document.body.appendChild(mainDiv);
-
-  startButton = document.createElement("button");
-  startButton.classList.add("start");
-  startButton.innerHTML = "Start";
-  startButton.addEventListener("click", function () {
-    clearScreen();
-    game();
-  });
-  mainDiv.appendChild(startButton);
-}
-
-function clearScreen() {
-  let div = document.getElementById("mainScreen");
-  document.body.removeChild(div);
-}
-
 function setCar(place, type, x, y) {
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 4; j++) {
@@ -146,13 +122,29 @@ function setCar(place, type, x, y) {
   }
 }
 
+function drawImageCar(place, type, x, y) {
+  if (type == 1 || type == 2) {
+    tw = width / grid.width;
+    th = height / grid.height;
+    image(carImage, x * tw, y * th, 3 * tw, 4 * th);
+  }
+}
+
+function preload() {
+  carImage = loadImage("./CAR.png");
+  carImageR = loadImage("./RCAR1.jpg");
+}
+
 function setup() {
   //initialise the game
+  
   init();
+  console.log(map.cars);
 
   //map + cars
   createCanvas(COL * 20, ROW * 20);
   background(143, 200, 45);
+    update();
 }
 
 function draw() {
@@ -163,45 +155,53 @@ function update() {
   if (!gamefail) {
     frames++;
     let carposNew = carpos;
+    speed = NORMAL;
+    if (keyIsPressed) {
+      //to reduce sensitivity of keys being presed
+      if (frames - currFrame > 10) {
+        //get key pressed and new position
+        if (keyCode == LEFT_ARROW && carpos == RIGHT) {
+          carposNew = CENTER;
+          currFrame = frames;
+        }
+        if (keyCode == LEFT_ARROW && carpos == CENTER) {
+          carposNew = LEFT;
+          currFrame = frames;
+        }
+        if (keyCode == RIGHT_ARROW && carpos == CENTER) {
+          carposNew = RIGHT;
+          currFrame = frames;
+        }
+        if (keyCode == RIGHT_ARROW && carpos == LEFT) {
+          carposNew = CENTER;
+          currFrame = frames;
+        }
+      }
 
-    //to reduce sensitivity of keys being presed
-    if (frames - currFrame > 6) {
-      //get key pressed and new position
-      if (keyCode == LEFT_ARROW && carpos == RIGHT) {
-        carposNew = CENTER;
-        currFrame = frames;
+      if (keyCode == RIGHT_ARROW || keyCode == LEFT_ARROW) {
+        //set car in current position EMPTY and ser new RCAR
+        setCar(grid, EMPTY, carpos, ROW - 5);
+        setCar(grid, RCAR, carposNew, ROW - 5);
       }
-      if (keyCode == LEFT_ARROW && carpos == CENTER) {
-        carposNew = LEFT;
-        currFrame = frames;
-      }
-      if (keyCode == RIGHT_ARROW && carpos == CENTER) {
-        carposNew = RIGHT;
-        currFrame = frames;
-      }
-      if (keyCode == RIGHT_ARROW && carpos == LEFT) {
-        carposNew = CENTER;
-        currFrame = frames;
+
+      // control speed TBD
+      if (keyCode == UP_ARROW) {
+        speed = FAST;
+      } else {
+        speed = NORMAL;
       }
     }
-
-    //control speed
-    if (keyCode == UP_ARROW) {
-      speed = FAST;
-    } else {
-      speed = NORMAL;
-    }
-
-    if (keyCode == RIGHT_ARROW || keyCode == LEFT_ARROW) {
-      //set car in current position EMPTY and ser new RCAR
-      setCar(grid, EMPTY, carpos, ROW - 5);
-      setCar(grid, RCAR, carposNew, ROW - 5);
-    }
-
-    carpos = carposNew;
 
     drawCar(count);
     check(count);
+
+    for(let i=0;i<map.cars.length;i++) {
+      drawImageCar(grid, CAR, map.cars[i].x,  grid.height-map.height+map.cars[i].y+count);
+    }
+    console.log(ROW);
+    drawImageCar(grid, RCAR, carposNew, ROW - 5);
+    
+    carpos = carposNew;
 
     //move the map
     if (frameCount % speed == 0) {
@@ -221,6 +221,7 @@ function update() {
 }
 
 function check(count) {
+  console.log(count);
   for (let i = 0; i < grid.width; i++) {
     for (let j = 0; j < grid.height; j++) {
       if (
@@ -243,7 +244,6 @@ function calcscore(count) {
   for (let i = 0; i < grid.width; i++) {
     if (map.get(i, map.height - grid.height - count) == 1) {
       carcrossed++;
-      console.log(i + "--" + (map.height - grid.height - count));
     }
   }
 }
@@ -297,5 +297,6 @@ function init() {
   setvariables();
   grid.init(EMPTY, COL, ROW);
   setCar(grid, RCAR, carpos, ROW - 5);
+  drawImageCar(grid, RCAR, carpos, ROW - 5);
   map.init(EMPTY);
 }
