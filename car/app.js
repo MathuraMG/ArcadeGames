@@ -156,17 +156,6 @@ function createCanvas() {
   document.body.appendChild(canvas);
 }
 
-function getKey() {
-  keystate = [];
-  document.addEventListener("keydown", function (evt) {
-    keystate[evt.keyCode] = true;
-  });
-
-  document.addEventListener("keyup", function (evt) {
-    delete keystate[evt.keyCode];
-  });
-}
-
 function setup() {
   //initialise the game
   init();
