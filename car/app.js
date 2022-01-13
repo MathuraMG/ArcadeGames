@@ -9,7 +9,10 @@ let CENTER = 9,
   LEFT = 3,
   RIGHT = 15;
 
-let carImage, carImageR;
+let carImageR, carImage1, carImage2, carImage3;
+let roadImage, lineImage;
+let carImages = [];
+
 //Key states
 let ESC = 27;
 
@@ -62,8 +65,7 @@ class Map {
       posxprev = randx;
       randy = Math.floor(Math.random() * 3);
       setCar(this, CAR, posx[randx], posyprev + ydiff[randy]);
-      this.cars.push({x: posx[randx], y:posyprev + ydiff[randy]});
-      drawImageCar(this, CAR, posx[randx], posyprev + ydiff[randy]);
+      this.cars.push({x: posx[randx], y:posyprev + ydiff[randy], carNo: floor(random(0,3))});
       posyprev = posyprev + ydiff[randy];
     }
 
@@ -122,32 +124,46 @@ function setCar(place, type, x, y) {
   }
 }
 
-function drawImageCar(place, type, x, y) {
-  if (type == 1 || type == 2) {
-    tw = width / grid.width;
-    th = height / grid.height;
-    image(carImage, x * tw, y * th, 3 * tw, 4 * th);
+function drawImageCar(place, type, x, y, carNo) {
+  let carImageTemp;
+  tw = width / grid.width;
+  th = height / grid.height;
+  if (type == 1) {
+    carImageTemp = carImages[carNo];  
+  } else if(type==2) {
+    carImageTemp = carImageR; 
   }
+  image(carImageTemp, x * tw -1*tw, y * th, 3.5 * tw, 4.2 * th);
 }
 
 function preload() {
-  carImage = loadImage("./CAR.png");
-  carImageR = loadImage("./RCAR1.jpg");
+  carImage1 = loadImage("./assets/car1.png");
+  carImage2 = loadImage("./assets/car2.png");
+  carImage3 = loadImage("./assets/car3.png");
+  carImages = [carImage1, carImage2, carImage3];
+  carImageR = loadImage("./assets/raceCar.png");
+  roadImage = loadImage("./assets/background.png");
+  lineImage = loadImage("./assets/lines.png");
 }
-
+let lineY;
 function setup() {
   //initialise the game
   
   init();
-  console.log(map.cars);
 
   //map + cars
   createCanvas(COL * 20, ROW * 20);
-  background(143, 200, 45);
-    update();
+  update();
 }
 
 function draw() {
+  image(roadImage,0,0,width, height);
+  
+  if(frameCount % speed==0) {
+    lineY+=grid.height;
+  }
+  image(lineImage,0,lineY%(height),width, height);
+  image(lineImage,0,lineY%(height)-height,width, height);
   update();
 }
 
@@ -192,14 +208,14 @@ function update() {
       }
     }
 
-    drawCar(count);
     check(count);
 
     for(let i=0;i<map.cars.length;i++) {
-      drawImageCar(grid, CAR, map.cars[i].x,  grid.height-map.height+map.cars[i].y+count);
+      
+      drawImageCar(grid, CAR, map.cars[i].x,  grid.height-map.height+map.cars[i].y+count, map.cars[i].carNo);
     }
     console.log(ROW);
-    drawImageCar(grid, RCAR, carposNew, ROW - 5);
+    drawImageCar(grid, RCAR, carposNew, ROW - 5,0);
     
     carpos = carposNew;
 
@@ -248,33 +264,7 @@ function calcscore(count) {
   }
 }
 
-function drawCar(count) {
-  tw = width / grid.width;
-  th = height / grid.height;
-
-  for (let i = 0; i < grid.width; i++) {
-    for (let j = 0; j < grid.height; j++) {
-      switch (
-        grid.get(i, j) + map.get(i, j + (map.height - grid.height - count))
-      ) {
-        case EMPTY:
-          fill("#ffffff");
-          rect(i * tw, j * th, tw, th);
-          break;
-        case CAR:
-          fill("#660033");
-          rect(i * tw, j * th, tw, th);
-          break;
-        case RCAR:
-          fill("#D699AE");
-          rect(i * tw, j * th, tw, th);
-          break;
-        case 3:
-          fill("#000000");
-          rect(i * tw, j * th, tw, th);
-      }
-    }
-  }
+function showScore(count) {
   fill("#000");
   // ctx.font =  "12px Arial";
   text("CARS CROSSED : " + Math.floor(carcrossed / 8), 10, height - 10);
@@ -294,9 +284,10 @@ function setvariables() {
 }
 
 function init() {
+  lineY = 0;
   setvariables();
   grid.init(EMPTY, COL, ROW);
   setCar(grid, RCAR, carpos, ROW - 5);
-  drawImageCar(grid, RCAR, carpos, ROW - 5);
+  // drawImageCar(grid, RCAR, carpos, ROW - 5);
   map.init(EMPTY);
 }
