@@ -1,7 +1,6 @@
-canvas.grid {
-  display: block;
+canvas {
+  display: flex;
   position: absolute;
-  border: 3px solid black;
   margin: auto;
   top: 0;
   bottom: 0;
@@ -10,18 +9,6 @@ canvas.grid {
 }
 
 body {
-  background-color: #333333;
+  background-color: #ecc04529;
 }
 
-button.start {
-  background-color: #ffffff;
-  position: absolute;
-  margin: auto;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  width: 300px;
-  height: 50px;
-  font-size: 20px;
-}

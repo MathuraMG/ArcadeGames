@@ -1,24 +1,24 @@
 /******************* VARIABLE DEFINITION *************************/
 //Constants
-let ROW = 30,
+const ROW = 25,
   COL = 20;
-let EMPTY = 0,
+const EMPTY = 0,
   CAR = 1,
   RCAR = 2;
-let CENTER = 9,
+const CENTER = 9,
   LEFT = 3,
   RIGHT = 15;
+const GRID_SIZE = window.innerHeight / 40;
 
+//speed variables
+const FAST = 1,
+  NORMAL = 8;
+
+//Image variables
 let carImageR, carImage1, carImage2, carImage3;
 let roadImage, lineImage;
 let carImages = [];
-
-//Key states
-let ESC = 27;
-
-//speed variables
-let FAST = 1,
-  NORMAL = 8;
+let lineImageY;
 
 //Game variables
 let score, frames, currFrame, speed;
@@ -31,86 +31,8 @@ let carcrossed;
 let startTime, endTime;
 
 //Main variables
-class Map {
-  constructor() {
-    this.width = null;
-    this.height = null;
-    this._grid = null;
-    this.cars = [];
-  }
-
-  init(d) {
-    this.width = COL;
-    this.height = ROW * 20;
-    this._grid = [];
-    this.cars = [];
-
-    for (let i = 0; i < this.width; i++) {
-      this._grid.push([]);
-      for (let j = 0; j < this.height; j++) {
-        this._grid[i].push(d);
-      }
-    }
-
-    let posx = [LEFT, CENTER, RIGHT];
-    let posyprev = 0;
-    let posxprev = 1;
-    let ydiff = [8, 9, 10];
-    let randx, randy;
-
-    while (posyprev < this.height - 20) {
-      do {
-        randx = Math.floor(Math.random() * 3);
-      } while (randx == posxprev);
-      posxprev = randx;
-      randy = Math.floor(Math.random() * 3);
-      setCar(this, CAR, posx[randx], posyprev + ydiff[randy]);
-      this.cars.push({x: posx[randx], y:posyprev + ydiff[randy], carNo: floor(random(0,3))});
-      posyprev = posyprev + ydiff[randy];
-    }
-
-  }
-
-  set(val, x, y) {
-    this._grid[x][y] = val;
-  }
-
-  get(x, y) {
-    return this._grid[x][y];
-  }
-}
 
 let map = new Map();
-
-class Grid {
-  constructor() {
-    this.width = null;
-    this.height = null;
-    this._grid = null;
-  }
-
-  init(d, c, r) {
-    this.width = COL;
-    this.height = ROW;
-    this._grid = [];
-
-    for (let i = 0; i < c; i++) {
-      this._grid.push([]);
-      for (let j = 0; j < r; j++) {
-        this._grid[i].push(d);
-      }
-    }
-  }
-
-  set(val, x, y) {
-    this._grid[x][y] = val;
-  }
-
-  get(x, y) {
-    return this._grid[x][y];
-  }
-}
-
 let grid = new Grid();
 
 /*************** FUNCTION DEFINITIONS **********************/
@@ -129,11 +51,11 @@ function drawImageCar(place, type, x, y, carNo) {
   tw = width / grid.width;
   th = height / grid.height;
   if (type == 1) {
-    carImageTemp = carImages[carNo];  
-  } else if(type==2) {
-    carImageTemp = carImageR; 
+    carImageTemp = carImages[carNo];
+  } else if (type == 2) {
+    carImageTemp = carImageR;
   }
-  image(carImageTemp, x * tw -1*tw, y * th, 3.5 * tw, 4.2 * th);
+  image(carImageTemp, x * tw - 1 * tw, y * th, 3.5 * tw, 4.2 * th);
 }
 
 function preload() {
@@ -145,25 +67,21 @@ function preload() {
   roadImage = loadImage("./assets/background.png");
   lineImage = loadImage("./assets/lines.png");
 }
-let lineY;
+
 function setup() {
   //initialise the game
-  
   init();
-
   //map + cars
-  createCanvas(COL * 20, ROW * 20);
-  update();
+  createCanvas(COL * GRID_SIZE, ROW * GRID_SIZE);
 }
 
 function draw() {
-  image(roadImage,0,0,width, height);
-  
-  if(frameCount % speed==0) {
-    lineY+=grid.height;
+  image(roadImage, 0, 0, width, height);
+  if (frameCount % speed == 0) {
+    lineImageY += grid.height;
   }
-  image(lineImage,0,lineY%(height),width, height);
-  image(lineImage,0,lineY%(height)-height,width, height);
+  image(lineImage, 0, lineImageY % height, width, height);
+  image(lineImage, 0, (lineImageY % height) - height, width, height);
   update();
 }
 
@@ -210,13 +128,18 @@ function update() {
 
     check(count);
 
-    for(let i=0;i<map.cars.length;i++) {
-      
-      drawImageCar(grid, CAR, map.cars[i].x,  grid.height-map.height+map.cars[i].y+count, map.cars[i].carNo);
+    //draw the cars
+    for (let i = 0; i < map.cars.length; i++) {
+      drawImageCar(
+        grid,
+        CAR,
+        map.cars[i].x,
+        grid.height - map.height + map.cars[i].y + count,
+        map.cars[i].carNo
+      );
     }
-    console.log(ROW);
-    drawImageCar(grid, RCAR, carposNew, ROW - 5,0);
-    
+    drawImageCar(grid, RCAR, carposNew, ROW - 5, 0);
+
     carpos = carposNew;
 
     //move the map
@@ -236,8 +159,8 @@ function update() {
   }
 }
 
+//Check for car crash
 function check(count) {
-  console.log(count);
   for (let i = 0; i < grid.width; i++) {
     for (let j = 0; j < grid.height; j++) {
       if (
@@ -284,7 +207,7 @@ function setvariables() {
 }
 
 function init() {
-  lineY = 0;
+  lineImageY = 0;
   setvariables();
   grid.init(EMPTY, COL, ROW);
   setCar(grid, RCAR, carpos, ROW - 5);

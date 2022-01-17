@@ -1,20 +1,23 @@
-/******************************** letIABLE DEFINITIONS *********************/
+/******************************** VARIABLE DEFINITIONS *********************/
 //Constants
-let row = 26,
-  col = 26;
-let EMPTY = 0,
+const row = 20,
+  col = 20;
+const EMPTY = 0,
   SNAKE = 1,
   FOOD = 2,
   NUMNUM = 3;
 
-//Directions
-let UP = 0,
-  DOWN = 1,
-  LEFT = 2,
-  RIGHT = 3;
+const IMG_OFFSET = 3;
+
+const LEFT = 0,
+  UP = 1,
+  RIGHT = 2,
+  DOWN = 3;
+
+const GRID_SIZE = window.innerHeight / 30;
 
 //Game objects
-let score;
+let score, sp;
 
 // All let for numnum
 let startTime,
@@ -23,69 +26,31 @@ let startTime,
   numy = 0;
 
 //Food pictures
-let cherry, grapes;
+let cherry, grape, grass;
 
 function preload() {
-  cherry = loadImage("cherries.png");
-  grapes = loadImage("grapes.jpeg");
+  cherry = loadImage("./assets/cherry.png");
+  grape = loadImage("./assets/grape.png");
+  grass = loadImage("./assets/back.png");
+  body1 = loadImage("./assets/body1.png");
+  body2 = loadImage("./assets/body2.png");
+  body3 = loadImage("./assets/body3.png");
+
+  headonlyLeft = loadImage("./assets/headonlyLeft.png");
+  headonlyRight = loadImage("./assets/headonlyRight.png");
+  headonlyUp = loadImage("./assets/headonlyUp.png");
+  headonlyDown = loadImage("./assets/headonlyDown.png");
+  
+  headLeft = loadImage("./assets/headLeft.png");
+  headRight = loadImage("./assets/headRight.png");
+  headUp = loadImage("./assets/headUp.png");
+  headDown = loadImage("./assets/headDown.png");
+  bodies = [body1, body2, body3];
 }
 
 //Main variables
-class Grid {
-  constructor() {
-    this.width = null;
-    this.height = null;
-    this._grid = null;
-  }
-
-  init(d, c, r) {
-    this.width = col;
-    this.height = row;
-
-    this._grid = [];
-
-    for (let i = 0; i < col; i++) {
-      this._grid.push([]);
-      for (let j = 0; j < row; j++) {
-        this._grid[i].push(d);
-      }
-    }
-  }
-
-  set(val, x, y) {
-    this._grid[x][y] = val;
-  }
-
-  get(x, y) {
-    return this._grid[x][y];
-  }
-}
 
 let grid = new Grid();
-
-class Snake {
-  constructor() {
-    this.direction = null;
-    this.last = null;
-    this._queue = null;
-  }
-
-  init(d, x, y) {
-    this.direction = d;
-    this._queue = [];
-    this.insert(x, y);
-  }
-
-  insert(x, y) {
-    this._queue.unshift({ x: x, y: y });
-    this.last = this._queue[0];
-  }
-
-  remove() {
-    return this._queue.pop();
-  }
-}
-
 let snake = new Snake();
 
 /****************** FUNCTION DEFINITIONS **********************/
@@ -95,7 +60,7 @@ function setFood(type) {
   for (let i = 0; i < grid.width; i++) {
     for (let j = 0; j < grid.height; j++) {
       if (grid.get(i, j) == EMPTY) {
-        empty.push({ x: i, y: j });
+        empty.push({ x: i, y: j, bodyType: floor(random(0,3)) });
       }
     }
   }
@@ -126,8 +91,6 @@ function moveSnake() {
   if (frameCount % 3 == 0) {
     let nx = snake.last.x;
     let ny = snake.last.y;
-    console.log(nx, ny);
-    console.log(snake);
     switch (snake.direction) {
       case LEFT:
         if (nx <= 0) {
@@ -206,26 +169,73 @@ function moveSnake() {
 }
 
 function drawSnake() {
-  console.log(width);
   let tw = width / grid.width;
   let th = height / grid.height;
 
   for (let i = 0; i < grid.width; i++) {
     for (let j = 0; j < grid.height; j++) {
+      noStroke();
       switch (grid.get(i, j)) {
         case EMPTY:
-          fill("#fff");
-          rect(i * tw, j * th, tw, th);
+
           break;
-        case SNAKE:
-          fill("#00F210");
-          rect(i * tw, j * th, tw, th);
+          case SNAKE:
+          // console.log(snake._queue[0].x,i);
+          if(snake._queue.length == 1) {
+            let imgTemp;
+            switch(snake.direction) {
+              case RIGHT:
+                imgTemp = headonlyRight;
+                image(imgTemp,i*tw,j*th, 2*tw+IMG_OFFSET*2, th+IMG_OFFSET*2);
+                break;
+              case LEFT:
+                imgTemp = headonlyLeft;
+                image(imgTemp,i*tw-tw,j*th, 2*tw+IMG_OFFSET*2, th+IMG_OFFSET*2);
+                break;
+              case UP:
+                imgTemp = headonlyUp;
+                image(imgTemp,i*tw,j*th-th, tw+IMG_OFFSET*2, 2*th+IMG_OFFSET*2);
+                break;
+              case DOWN:
+                imgTemp = headonlyDown;
+                image(imgTemp,i*tw,j*th, tw+IMG_OFFSET*2, 2*th+IMG_OFFSET*2);
+                break;  
+              default:
+                break;  
+            }
+          } else {
+            if (i == snake._queue[0].x && j == snake._queue[0].y) {
+              switch(snake.direction) {
+                case RIGHT:
+                  imgTemp = headRight;
+                  image(imgTemp,i*tw,j*th, 2*tw+IMG_OFFSET*2, th+IMG_OFFSET*2);
+                  break;
+                case LEFT:
+                  imgTemp = headLeft;
+                  image(imgTemp,i*tw-tw,j*th, 2*tw+IMG_OFFSET*2, th+IMG_OFFSET*2);
+                  break;
+                case UP:
+                  imgTemp = headUp;
+                  image(imgTemp,i*tw,j*th-th, tw+IMG_OFFSET*2, 2*th+IMG_OFFSET*2);
+                  break;
+                case DOWN:
+                  imgTemp = headDown;
+                  image(imgTemp,i*tw,j*th, tw+IMG_OFFSET*2, 2*th+IMG_OFFSET*2);
+                  break;  
+                default:
+                  break;  
+              }
+            } else {
+                image(body1,i * tw-IMG_OFFSET, j * th-IMG_OFFSET, tw+IMG_OFFSET*2, th+IMG_OFFSET*2);
+            }
+          }
+          
           break;
         case FOOD:
           image(cherry, i * tw, j * th, tw, th);
           break;
         case NUMNUM:
-          image(grapes, i * tw, j * th, tw, th);
+          image(grape, i * tw-IMG_OFFSET, j * th-IMG_OFFSET, tw+IMG_OFFSET*2, th+IMG_OFFSET*2);
           break;
       }
     }
@@ -235,22 +245,27 @@ function drawSnake() {
   text("SCORE : " + score, 10, height - 10);
 }
 
-/************************ MAIN p5 FUNCTIONS **********************/
-
-function setup() {
-  createCanvas(col * 20, row * 20);
-  background(200, 123, 65);
+function init() {
   grid.init(EMPTY, col, row);
   score = 0;
-  let sp = { x: Math.floor(col / 2), y: row - 1 };
+  sp = { x: Math.floor(col / 2), y: row - 1 };
   snake.init(LEFT, sp.x, sp.y);
   grid.set(SNAKE, sp.x, sp.y);
   setFood(FOOD);
 }
+/************************ MAIN p5 FUNCTIONS **********************/
+
+function setup() {
+  createCanvas(col * GRID_SIZE, row * GRID_SIZE);
+  background(200, 123, 65);
+  init();
+}
 
 function draw() {
+  image(grass,0,0,width/2,height/2);
+  image(grass,width/2,0,width/2,height/2);
+  image(grass,width/2,height/2,width/2,height/2);
+  image(grass,0,height/2,width/2,height/2);
   moveSnake();
   drawSnake();
-
-  // window.requestAnimationFrame( loop, canvas );
 }
